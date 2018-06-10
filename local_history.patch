@@ -1,0 +1,104 @@
+Index: compute_aggregated_data.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- compute_aggregated_data.py	(revision )
++++ compute_aggregated_data.py	(revision )
+@@ -4,81 +4,44 @@
+ # Reading the csv file and storing in dataframe
+ meterReading_df = pd.read_csv("MeterReading.csv")
+ 
++#print(pd.__version__)
+ 
+-# Data wrangling - Part of the functionality might be processed in the previous step/recipe of Dataiku
+-# TODO: Analyze the impact on performance due the ordering/sequence of the column addition to the dataframe
+ 
+-
+-# Declaring and initializing the panda dataframe
+-pandas_dataframe = pd.DataFrame()
+-pandas_dataframe = pandas_dataframe.fillna(0)
+-
+-# This is to list the meter ID
+ meter_id = meterReading_df.groupby("meterID")['meterID'].mean()
+-pandas_dataframe["meterID"] = pd.Series(meter_id)
+-
+-# Computing the mean of kwh grouped by meterID
+ comp_mean = meterReading_df.groupby("meterID")['kwh'].mean()
+-pandas_dataframe["mean"] = pd.Series(comp_mean)
+-
+-# Computing the variance of kwh grouped by meterID
+ comp_variance = meterReading_df.groupby("meterID")['kwh'].var()
+-pandas_dataframe["Var"] = pd.Series(comp_variance)
+-
+-# Computing the standard deviation of kwh grouped by meterID
+ comp_std = meterReading_df.groupby("meterID")['kwh'].std()
+-pandas_dataframe["SD"] = pd.Series(comp_std)
+-
+-
+ no_of_days = meterReading_df.groupby("meterID")['day'].nunique()
+ 
+ 
+-# TODO: ? what is the difference between the l and n paramter in paper
+-# To determine the maximum power consumption for a given meterID
++
+ max_consumption_df = meterReading_df.groupby("meterID").max()
++min_consumption_df = meterReading_df.groupby("meterID").min()
+ max_consumption = max_consumption_df['kwh']
+-pandas_dataframe["max"] = pd.Series(max_consumption)
+-
+-# Determining the cycle during which the maximum consumption occurs
+ max_cycle = max_consumption_df['time']
+-# Not the elegant way of identifying the cycle in which max power consumption occurs
+-# TODO: Update the function or find the better way of identifying the cycle
+-max_loc = meterReading_df.loc[meterReading_df.groupby(['meterID'])['kwh'].idxmax()]
+-toumax = max_loc.groupby("meterID")['time'].max()
+-pandas_dataframe["ToUmax"] = pd.Series(toumax)
+-
+-# Computing the minimum power consumed for given meterID
+-# May be required for future use
+-min_consumption_df = meterReading_df.groupby("meterID").min()
+-
+-
+-# Determining the total electricity consumed over a period of time (0 to 48 interval)
+ tec = meterReading_df.groupby("meterID")['kwh'].sum()
+-pandas_dataframe["TEC"] = pd.Series(tec)
+-
+-
+-# Determining the mean daily max average of the max values 
+ mdm_aggr = meterReading_df.groupby(["meterID", "day"])['kwh'].max()
+ consumption_range = max_consumption_df - min_consumption_df
+ 
+-
++max_loc = meterReading_df.loc[meterReading_df.groupby(['meterID'])['kwh'].idxmax()]
++toumax = max_loc.groupby("meterID")['time'].max()
+ mdm = mdm_aggr.groupby(level='meterID').mean()
+ load_factor =  comp_mean / mdm
+ 
+ 
+ 
+-
+-
+-
+-
+-
+-
+-
+-
++pandas_dataframe = pd.DataFrame()
++pandas_dataframe = pandas_dataframe.fillna(0)
++pandas_dataframe["meterID"] = pd.Series(meter_id)
++pandas_dataframe["mean"] = pd.Series(comp_mean)
++pandas_dataframe["Var"] = pd.Series(comp_variance)
++pandas_dataframe["SD"] = pd.Series(comp_std)
++pandas_dataframe["max"] = pd.Series(max_consumption)
++pandas_dataframe["ToUmax"] = pd.Series(toumax)
++pandas_dataframe["TEC"] = pd.Series(tec)
+ pandas_dataframe["MDM"] = pd.Series(mdm)
+ pandas_dataframe["LF"] = pd.Series(load_factor)
+-pandas_dataframe["Range"] = pd.Series(consumption_range)
+-
++pandas_dataframe[]
+ 
+ 
+ 
